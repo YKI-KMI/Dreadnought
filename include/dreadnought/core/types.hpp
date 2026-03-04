@@ -7,7 +7,7 @@
 namespace dreadnought {
 
 using Price = double;
-using Quantity = std::uint64_t;
+using Quantity = uint32_t;
 using OrderID = uint64_t;
 using Timestamp = uint64_t;
 using SymbolID = uint32_t;

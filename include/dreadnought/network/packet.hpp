@@ -5,9 +5,6 @@
 
 namespace dreadnought {
 
-// Wire protocol packet structures
-// Designed for zero-copy DMA transfer
-
 enum class PacketType : uint8_t {
     MARKET_DATA_UPDATE = 1,
     TRADE = 2,
@@ -15,7 +12,6 @@ enum class PacketType : uint8_t {
     ORDER_REJECT = 4
 };
 
-// Packet header - 16 bytes, cache-line aligned for DMA
 struct alignas(16) PacketHeader {
     uint64_t sequence_num;
     Timestamp exchange_ts;
@@ -39,7 +35,7 @@ struct alignas(16) MarketDataPayload {
 
 static_assert(sizeof(MarketDataPayload) == 32, "MarketDataPayload must be 32 bytes");
 
-// Complete packet - header + payload
+
 struct alignas(64) Packet {
     PacketHeader header;
     union {
@@ -54,7 +50,6 @@ struct alignas(64) Packet {
 
 static_assert(sizeof(Packet) == 64, "Packet must be 64 bytes (one cache line)");
 
-// Order encoding for TX path
 struct alignas(64) OrderPacket {
     PacketHeader header;
     Side side;
@@ -69,4 +64,4 @@ struct alignas(64) OrderPacket {
 
 static_assert(sizeof(OrderPacket) == 64, "OrderPacket must be 64 bytes");
 
-} // namespace dreadnought
+} 
