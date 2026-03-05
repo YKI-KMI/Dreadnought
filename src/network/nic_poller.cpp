@@ -1,5 +1,6 @@
 #include "dreadnought/network/nic_poller.hpp"
 #include <sys/mman.h>
+#include <cstdlib>
 #include <cstring>
 
 namespace dreadnought {

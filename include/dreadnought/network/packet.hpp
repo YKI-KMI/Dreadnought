@@ -19,7 +19,7 @@ struct alignas(16) PacketHeader {
     uint8_t symbol_id;
     uint16_t payload_len;
     uint32_t _pad;
-};
+} __attribute__((packed));
 
 static_assert(sizeof(PacketHeader) == 16, "PacketHeader must be 16 bytes");
 
@@ -46,7 +46,7 @@ struct alignas(64) Packet {
     FORCE_INLINE bool is_market_data() const noexcept {
         return header.type == PacketType::MARKET_DATA_UPDATE;
     }
-};
+} __attribute__((packed));
 
 static_assert(sizeof(Packet) == 64, "Packet must be 64 bytes (one cache line)");
 
@@ -60,7 +60,7 @@ struct alignas(64) OrderPacket {
     uint64_t client_order_id;
     uint8_t symbol_id;
     uint8_t _pad2[23];
-};
+} __attribute__((packed));
 
 static_assert(sizeof(OrderPacket) == 64, "OrderPacket must be 64 bytes");
 

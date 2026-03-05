@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Compiler selection: Clang/LLVM strongly preferred
+# Compiler selection: Clang/LLVM strongly preferred (ALT:?)
 if(NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message(WARNING "Clang is strongly recommended for PGO and deterministic codegen")
 endif()
@@ -16,9 +16,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# ============================================================================
-# COMPILER FLAGS - PRODUCTION GRADE
-# ============================================================================
+
 
 set(COMMON_FLAGS
     -march=native          # Use all CPU features available
@@ -86,8 +84,10 @@ add_executable(dreadnought_main
     src/network/nic_poller.cpp
     src/logger/binary_logger.cpp
     src/threading/affinity.cpp
+    src/timing/rdtsc.cpp
     strategies/mean_reversion.cpp
 )
+
 target_link_libraries(dreadnought_main PRIVATE dreadnought_core)
 
 # ============================================================================
@@ -111,8 +111,8 @@ target_link_libraries(benchmark_latency PRIVATE dreadnought_core)
 # TOOLS
 # ============================================================================
 
-add_executable(replay_engine tools/replay_engine.cpp src/threading/affinity.cpp)
-target_link_libraries(replay_engine PRIVATE dreadnought_core)
+#add_executable(replay_engine tools/replay_engine.cpp src/threading/affinity.cpp)
+#target_link_libraries(replay_engine PRIVATE dreadnought_core)
 
 # ============================================================================
 # INSTALL
