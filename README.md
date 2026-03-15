@@ -6,7 +6,7 @@ A sub-microsecond tick-to-trade engine built in C++23, designed for high-frequen
 ![C++](https://img.shields.io/badge/C%2B%2B-23-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)
 
-## 🎯 Overview
+## Overview
 
 Dreadnought is a high-performance trading engine that processes market data and executes trading strategies in **under 1.2 microseconds** (wire-to-wire). It achieves this through:
 
@@ -17,7 +17,7 @@ Dreadnought is a high-performance trading engine that processes market data and 
 - **CPU isolation and pinning** (dedicated cores, real-time scheduling)
 - **Profile-Guided Optimization** (PGO) support
 
-## 📊 Performance Targets
+## Performance Targets
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                    WIRE-TO-WIRE LATENCY BUDGET                     │
@@ -39,20 +39,20 @@ Dreadnought is a high-performance trading engine that processes market data and 
 └────────────────────────┴─────────────┴──────────────┴──────────────┘
 ```
 
-## 🏗️ Architecture
+## Architecture
 ```
                            [ EXCHANGE ]
                                  ↓
                           Fiber / Microwave
                                  ↓
 ┌────────────────────────────────────────────────────────────────────┐
-│                          KERNEL BYPASS LAYER                        │
-│                      mmap() DMA Ring Buffer                         │
-│                       (Zero-Copy, No Syscalls)                      │
+│                          KERNEL BYPASS LAYER                       │
+│                      mmap() DMA Ring Buffer                        │
+│                       (Zero-Copy, No Syscalls)                     │
 └────────────────────────────────────────────────────────────────────┘
                                  ↓
 ┌────────────────────────────────────────────────────────────────────┐
-│                     TRADING THREAD (Core 2)                         │
+│                     TRADING THREAD (Core 2)                        │
 │  1. Poll NIC (Busy Wait)        [80ns]                             │
 │  2. Parse Packet (Zero-Copy)    [120ns]                            │
 │  3. Prefetch Book               [40ns]                             │
@@ -65,14 +65,14 @@ Dreadnought is a high-performance trading engine that processes market data and 
 └────────────────────────────────────────────────────────────────────┘
                                  ↓
 ┌────────────────────────────────────────────────────────────────────┐
-│                     LOGGER THREAD (Core 6)                          │
+│                     LOGGER THREAD (Core 6)                         │
 │  - Read binary log entries                                         │
 │  - Format to CSV/Text                                              │
 │  - Write to disk (async I/O)                                       │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -120,7 +120,7 @@ make -j$(nproc)
 ./dreadnought_main
 ```
 
-## 📁 Project Structure
+## Project Structure
 ```
 dreadnought/
 ├── CMakeLists.txt              # Build configuration
@@ -169,7 +169,7 @@ dreadnought/
     └── pgo_profile.sh          # Profile-Guided Optimization script
 ```
 
-## 🔧 Advanced Build Options
+## Advanced Build Options
 
 ### Profile-Guided Optimization (PGO)
 
@@ -212,7 +212,7 @@ make -j$(nproc)
 gdb ./dreadnought_main
 ```
 
-## 🧪 Testing
+## Testing
 ```bash
 cd build
 
@@ -227,7 +227,7 @@ make test
 ./benchmark_latency
 ```
 
-## ⚙️ System Configuration (Production)
+## System Configuration (Production)
 
 For optimal performance in production, configure your Linux system:
 
@@ -279,7 +279,7 @@ echo 20 | sudo tee /proc/sys/vm/nr_hugepages
 cat /proc/meminfo | grep HugePages
 ```
 
-## 🎓 Key Design Decisions
+## Key Design Decisions
 
 ### Memory Architecture
 
@@ -314,7 +314,7 @@ cat /proc/meminfo | grep HugePages
 - **Real-Time Priority**: `SCHED_FIFO` priority 99
 - **NUMA-Aware**: Single NUMA node to avoid remote memory access
 
-## 📈 Performance Tuning Guide
+## Performance Tuning Guide
 
 ### Reducing Latency
 
@@ -342,7 +342,7 @@ perf stat -e branch-misses,branches ./dreadnought_main
 perf stat -e context-switches ./dreadnought_main
 ```
 
-## 🔍 Debugging & Profiling
+## Debugging & Profiling
 
 ### Check Compiler Output
 ```bash
@@ -374,7 +374,7 @@ int main() { return sizeof(dreadnought::OrderBook); }' | \
 clang++-16 -x c++ -std=c++23 - -I include
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please focus on:
 
@@ -383,11 +383,11 @@ Contributions are welcome! Please focus on:
 - Better testing coverage
 - Documentation improvements
 
-## 📝 License
+## License
 
 MIT License - See LICENSE file for details
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 This is educational/research code. Not suitable for production trading without:
 
@@ -397,7 +397,7 @@ This is educational/research code. Not suitable for production trading without:
 - Regulatory compliance
 - Extensive testing with real market data
 
-## 📚 Further Reading
+## Further Reading
 
 - [Intel® Data Plane Development Kit (DPDK)](https://www.dpdk.org/)
 - [Solarflare Onload](https://www.xilinx.com/products/cloud-connectivity/onload.html)
@@ -405,10 +405,10 @@ This is educational/research code. Not suitable for production trading without:
 - [Martin Thompson - Low Latency Performance](https://www.youtube.com/watch?v=MC1EKLQ2Wmg)
 - [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Built upon principles from top-tier HFT firms and low-latency engineering best practices.
 
 ---
 
-**Built with ⚡ for speed | Designed for 📊 trading | Optimized for ⏱️ latency**
+**Built for speed | Designed for trading | Optimized for Latency**
