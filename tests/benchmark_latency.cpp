@@ -3,54 +3,55 @@
 #include "dreadnought/market_data/order_book.hpp"
 #include <iostream>
 #include <vector>
+#include <memory>
 
 using namespace dreadnought;
 
 void benchmark_rdtsc() {
-    constexpr int ITERATIONS = 1000000;
-    LatencyTracker<ITERATIONS> tracker;
+    constexpr int ITERATIONS = 100000;
+    auto tracker = std::make_unique<LatencyTracker<ITERATIONS>>();
     
     for (int i = 0; i < ITERATIONS; ++i) {
         uint64_t start = rdtsc();
         uint64_t end = rdtsc();
-        tracker.record(end - start);
+        tracker->record(end - start);
     }
     
-    tracker.compute_percentiles();
+    tracker->compute_percentiles();
     
     std::cout << "=== RDTSC Overhead ===\n";
-    std::cout << "Mean:  " << tracker.mean() << " cycles\n";
-    std::cout << "P50:   " << tracker.p50() << " cycles\n";
-    std::cout << "P99:   " << tracker.p99() << " cycles\n";
-    std::cout << "P99.9: " << tracker.p999() << " cycles\n";
+    std::cout << "Mean:  " << tracker->mean() << " cycles\n";
+    std::cout << "P50:   " << tracker->p50() << " cycles\n";
+    std::cout << "P99:   " << tracker->p99() << " cycles\n";
+    std::cout << "P99.9: " << tracker->p999() << " cycles\n";
 }
 
 void benchmark_order_book_update() {
     constexpr int ITERATIONS = 100000;
-    LatencyTracker<ITERATIONS> tracker;
+    auto tracker = std::make_unique<LatencyTracker<ITERATIONS>>();
     
     OrderBook book;
     
-    // Pre-populate
+    // Pre-populate with fixed-point prices using PRICE_SCALER
     for (int i = 0; i < 10; ++i) {
-        book.update_bid(100.0 - i * 0.01, 100);
-        book.update_ask(101.0 + i * 0.01, 100);
+        book.update_bid((100 * PRICE_SCALER) - i * 100, 100);
+        book.update_ask((101 * PRICE_SCALER) + i * 100, 100);
     }
     
     for (int i = 0; i < ITERATIONS; ++i) {
-        uint64_t start = rdtsc();
-        book.update_bid(100.0, 500 + i % 100);
-        uint64_t end = rdtsc();
-        tracker.record(end - start);
+        uint64_t start = rdtscp();
+        book.update_bid(100 * PRICE_SCALER, 500 + i % 100);
+        uint64_t end = rdtscp();
+        tracker->record(end - start);
     }
     
-    tracker.compute_percentiles();
+    tracker->compute_percentiles();
     
     std::cout << "\n=== Order Book Update ===\n";
-    std::cout << "Mean:  " << tracker.mean() << " cycles\n";
-    std::cout << "P50:   " << tracker.p50() << " cycles\n";
-    std::cout << "P99:   " << tracker.p99() << " cycles\n";
-    std::cout << "P99.9: " << tracker.p999() << " cycles\n";
+    std::cout << "Mean:  " << tracker->mean() << " cycles\n";
+    std::cout << "P50:   " << tracker->p50() << " cycles\n";
+    std::cout << "P99:   " << tracker->p99() << " cycles\n";
+    std::cout << "P99.9: " << tracker->p999() << " cycles\n";
 }
 
 int main() {

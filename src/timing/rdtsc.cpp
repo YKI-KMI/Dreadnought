@@ -35,8 +35,12 @@ void TSCCalibrator::calibrate() noexcept {
         ns_deltas[i] = ns_elapsed;
     }
     
-    // Use median sample to avoid outliers
+    // Sort samples to allow robust outlier rejection (actual median approach)
+    std::sort(tsc_deltas, tsc_deltas + SAMPLES);
+    std::sort(ns_deltas, ns_deltas + SAMPLES);
+    
     uint64_t tsc_sum = 0, ns_sum = 0;
+    // Discard 2 smallest and 2 largest samples
     for (int i = 2; i < SAMPLES - 2; ++i) {
         tsc_sum += tsc_deltas[i];
         ns_sum += ns_deltas[i];

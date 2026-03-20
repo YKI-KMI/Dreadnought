@@ -85,7 +85,7 @@ add_executable(dreadnought_main
     src/logger/binary_logger.cpp
     src/threading/affinity.cpp
     src/timing/rdtsc.cpp
-    strategies/mean_reversion.cpp
+    strategy/mean_reversion.cpp
 )
 
 target_link_libraries(dreadnought_main PRIVATE dreadnought_core)

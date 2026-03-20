@@ -4,6 +4,7 @@
 #include "dreadnought/core/compiler.hpp"
 #include <array>
 #include <algorithm>
+#include <cstring>
 
 namespace dreadnought {
 
@@ -76,11 +77,11 @@ struct alignas(DESTRUCTIVE_SIZE) OrderBook {
     
     // Accessors - always inline for zero overhead
     FORCE_INLINE Price best_bid() const noexcept {
-        return bid_count > 0 ? bids[0].price : 0.0;
+        return bid_count > 0 ? bids[0].price : 0;
     }
     
     FORCE_INLINE Price best_ask() const noexcept {
-        return ask_count > 0 ? asks[0].price : 0.0;
+        return ask_count > 0 ? asks[0].price : 0;
     }
     
     FORCE_INLINE Quantity best_bid_qty() const noexcept {
@@ -92,45 +93,52 @@ struct alignas(DESTRUCTIVE_SIZE) OrderBook {
     }
     
     FORCE_INLINE Price mid_price() const noexcept {
-        if (bid_count == 0 || ask_count == 0) return 0.0;
-        return (bids[0].price + asks[0].price) * 0.5;
+        if (unlikely(bid_count == 0 || ask_count == 0)) return 0;
+        return (bids[0].price + asks[0].price) / 2;
     }
     
     FORCE_INLINE Price spread() const noexcept {
-        if (bid_count == 0 || ask_count == 0) return 0.0;
+        if (unlikely(bid_count == 0 || ask_count == 0)) return 0;
         return asks[0].price - bids[0].price;
     }
     
 private:
     // Binary search in sorted bid levels (descending)
     FORCE_INLINE int find_bid_level(Price price) const noexcept {
-        for (int i = 0; i < bid_count; ++i) {
-            if (bids[i].price == price) return i;
-            if (bids[i].price < price) return -1;
+        int lo = 0, hi = static_cast<int>(bid_count) - 1;
+        while (lo <= hi) {
+            int mid = (lo + hi) >> 1;
+            if (bids[mid].price == price) return mid;
+            if (bids[mid].price > price) lo = mid + 1;
+            else hi = mid - 1;
         }
         return -1;
     }
     
     FORCE_INLINE int find_ask_level(Price price) const noexcept {
-        for (int i = 0; i < ask_count; ++i) {
-            if (asks[i].price == price) return i;
-            if (asks[i].price > price) return -1;
+        int lo = 0, hi = static_cast<int>(ask_count) - 1;
+        while (lo <= hi) {
+            int mid = (lo + hi) >> 1;
+            if (asks[mid].price == price) return mid;
+            if (asks[mid].price < price) lo = mid + 1;
+            else hi = mid - 1;
         }
         return -1;
     }
     
     FORCE_INLINE void insert_bid_level(Price price, Quantity qty) noexcept {
-        if (bid_count >= MAX_PRICE_LEVELS) return;
+        if (unlikely(bid_count >= MAX_PRICE_LEVELS)) return;
         
-        // Find insertion point
+        // Find insertion point (first level with price < new price)
         int insert_idx = 0;
         while (insert_idx < bid_count && bids[insert_idx].price > price) {
             ++insert_idx;
         }
         
-        // Shift down
-        for (int i = bid_count; i > insert_idx; --i) {
-            bids[i] = bids[i - 1];
+        // Shift down using memmove for speed
+        if (insert_idx < bid_count) {
+            std::memmove(&bids[insert_idx + 1], &bids[insert_idx], 
+                         (bid_count - insert_idx) * sizeof(PriceLevel));
         }
         
         bids[insert_idx].price = price;
@@ -139,15 +147,16 @@ private:
     }
     
     FORCE_INLINE void insert_ask_level(Price price, Quantity qty) noexcept {
-        if (ask_count >= MAX_PRICE_LEVELS) return;
+        if (unlikely(ask_count >= MAX_PRICE_LEVELS)) return;
         
         int insert_idx = 0;
         while (insert_idx < ask_count && asks[insert_idx].price < price) {
             ++insert_idx;
         }
         
-        for (int i = ask_count; i > insert_idx; --i) {
-            asks[i] = asks[i - 1];
+        if (insert_idx < ask_count) {
+            std::memmove(&asks[insert_idx + 1], &asks[insert_idx], 
+                         (ask_count - insert_idx) * sizeof(PriceLevel));
         }
         
         asks[insert_idx].price = price;
@@ -156,16 +165,18 @@ private:
     }
     
     FORCE_INLINE void remove_bid_level(int idx) noexcept {
-        for (int i = idx; i < bid_count - 1; ++i) {
-            bids[i] = bids[i + 1];
+        if (idx < bid_count - 1) {
+            std::memmove(&bids[idx], &bids[idx + 1], 
+                         (bid_count - 1 - idx) * sizeof(PriceLevel));
         }
         bids[bid_count - 1].clear();
         --bid_count;
     }
     
     FORCE_INLINE void remove_ask_level(int idx) noexcept {
-        for (int i = idx; i < ask_count - 1; ++i) {
-            asks[i] = asks[i + 1];
+        if (idx < ask_count - 1) {
+            std::memmove(&asks[idx], &asks[idx + 1], 
+                         (ask_count - 1 - idx) * sizeof(PriceLevel));
         }
         asks[ask_count - 1].clear();
         --ask_count;

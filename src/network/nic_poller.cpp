@@ -9,8 +9,8 @@ NICPoller::NICPoller() noexcept
     : initialized_(false), mmap_region_(nullptr) {}
 
 NICPoller::~NICPoller() noexcept {
-    if (mmap_region_ != nullptr && mmap_region_ != MAP_FAILED) {
-        munmap(mmap_region_, RX_RING_SIZE * sizeof(Packet));
+    if (mmap_region_ != nullptr) {
+        free(mmap_region_);
     }
 }
 

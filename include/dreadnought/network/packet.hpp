@@ -2,6 +2,7 @@
 
 #include "dreadnought/core/types.hpp"
 #include "dreadnought/core/compiler.hpp"
+#include <cstdint>
 
 namespace dreadnought {
 
@@ -9,12 +10,13 @@ enum class PacketType : uint8_t {
     MARKET_DATA_UPDATE = 1,
     TRADE = 2,
     ORDER_ACK = 3,
-    ORDER_REJECT = 4
+    ORDER_REJECT = 4,
+    ORDER_NEW = 5
 };
 
-struct alignas(16) PacketHeader {
-    uint64_t sequence_num;
-    Timestamp exchange_ts;
+struct PacketHeader {
+    uint32_t sequence_num;
+    uint32_t exchange_ts;
     PacketType type;
     uint8_t symbol_id;
     uint16_t payload_len;
@@ -31,12 +33,14 @@ struct alignas(16) MarketDataPayload {
     Price price;
     Quantity qty;
     uint32_t _pad2;
+    uint64_t _pad3; // 20 + 8 = 28. Still 4 left.
+    uint32_t _pad4; // 28 + 4 = 32.
 };
 
 static_assert(sizeof(MarketDataPayload) == 32, "MarketDataPayload must be 32 bytes");
 
 
-struct alignas(64) Packet {
+struct Packet {
     PacketHeader header;
     union {
         MarketDataPayload market_data;
@@ -50,7 +54,7 @@ struct alignas(64) Packet {
 
 static_assert(sizeof(Packet) == 64, "Packet must be 64 bytes (one cache line)");
 
-struct alignas(64) OrderPacket {
+struct OrderPacket {
     PacketHeader header;
     Side side;
     OrderType order_type;

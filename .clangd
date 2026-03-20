@@ -1,0 +1,10 @@
+CompileFlags:
+  CompilationDatabase: build
+  Add: [-Iinclude, -I., -std=c++23, -m64, -march=native]
+  Remove: [-fno-reorder-blocks-and-partition]
+Index:
+  Background: Build
+Diagnostics:
+  UnusedIncludes: Strict
+  ClangTidy:
+    Add: [performance-*, bugprone-*, modernize-*]

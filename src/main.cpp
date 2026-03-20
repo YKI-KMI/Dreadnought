@@ -16,7 +16,10 @@ void signal_handler(int signal) {
 }
 
 // Instantiate TSC calibrator
-TSCCalibrator dreadnought::g_tsc_calibrator;
+// TSCCalibrator dreadnought::g_tsc_calibrator; // Defined in rdtsc.cpp
+
+#include <thread>
+#include <iostream>
 
 int main(int argc, char** argv) {
     std::signal(SIGINT, signal_handler);
@@ -35,7 +38,7 @@ int main(int argc, char** argv) {
     }
     
     std::cout << "Engine initialized\n";
-    std::cout << "TSC Frequency: " << g_tsc_calibrator.get_frequency_ghz() << " GHz\n";
+    std::cout << "TSC Frequency: " << g_tsc_calibrator.get_frequency_ghz() << " GHz (Calibrated)\n";
     std::cout << "Starting main loop...\n";
     
     // Run in separate thread to allow clean shutdown

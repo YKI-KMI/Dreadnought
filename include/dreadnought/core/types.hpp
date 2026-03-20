@@ -6,7 +6,8 @@
 
 namespace dreadnought {
 
-using Price = double;
+using Price = int64_t;
+constexpr Price PRICE_SCALER = 10000; // 4 decimal places
 using Quantity = uint32_t;
 using OrderID = uint64_t;
 using Timestamp = uint64_t;
@@ -31,7 +32,7 @@ struct alignas(16) PriceLevel {
     Quantity qty;
     
     FORCE_INLINE void clear() noexcept {
-        price = 0.0;
+        price = 0;
         qty = 0;
     }
     
