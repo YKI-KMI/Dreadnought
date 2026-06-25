@@ -1,10 +1,14 @@
-# ⚡ Dreadnought
+# Dreadnought
 
-**Ultra-low-latency tick-to-trade engine written in C++23**
+[![C++23](https://img.shields.io/badge/C++-23-blue.svg)](https://isocpp.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+
+**low-latency trade engine in C++23**
 
 Dreadnought is a high-frequency trading (HFT) infrastructure framework targeting single-digit microsecond tick-to-trade latency. It combines kernel-bypass networking, TSC-based nanosecond timing, cache-resident data structures, and a template-composable strategy layer into a single cohesive system.
 
-> **Status:** Research / framework stage. NIC poller is simulated; swap in DPDK/Solarflare/Mellanox for production.
+> **Status:** Research / framework stage. NIC poller is simulated; swap in DPDK/Solarflare/Mellanox for production. Contributions Welcome.
 
 ---
 
@@ -23,6 +27,7 @@ Dreadnought is a high-frequency trading (HFT) infrastructure framework targeting
 - [Writing a Custom Strategy](#writing-a-custom-strategy)
 - [Kernel Tuning (Production)](#kernel-tuning-production)
 - [Roadmap](#roadmap)
+- [Contributing](#contributing)
 - [License](#license)
 
 ---
@@ -378,14 +383,36 @@ echo 0 | sudo tee /sys/devices/system/cpu/cpu3/online
 
 ## Roadmap
 
-- [ ] DPDK / Solarflare / Mellanox NIC integration
-- [ ] FIX / ITCH / OUCH protocol parsers
-- [ ] Multi-symbol order book manager
-- [ ] Replay engine for historical backtesting (`tools/replay_engine.cpp` stub exists)
-- [ ] Market-making strategy template
-- [ ] Risk model hot-reload without restart
-- [ ] Prometheus metrics endpoint (off critical path)
-- [ ] CI pipeline with latency regression tests
+-  DPDK / Solarflare / Mellanox NIC integration
+-  FIX / ITCH / OUCH protocol parsers
+-  Multi-symbol order book manager
+-  Replay engine for historical backtesting (`tools/replay_engine.cpp` stub exists)
+-  Market-making strategy template
+-  Risk model hot-reload without restart
+-  Prometheus metrics endpoint (off critical path)
+-  CI pipeline with latency regression tests
+
+---
+## Contributing
+
+Dreadnought is actively in the research and framework stage. Contributions from the open-source community, high-performance computing engineers, and quantitative finance researchers are highly encouraged. Whether you are optimizing algorithmic bottlenecks, integrating hardware-specific DPDK network polling, or expanding our numerical pricing models, your input is welcome.
+
+### Contribution Guidelines
+
+Given the strict nanosecond-latency requirements of this framework, please adhere to the following architectural invariants when submitting code:
+
+1. **Zero Hot-Path Allocation:** The core engine relies exclusively on stack, arena, and pre-allocated memory. Do not introduce `new`, `malloc`, or STL containers that dynamically allocate (e.g., `std::vector`, `std::map`) within the market data, strategy, or execution loops.
+2. **Modern C++23:** Leverage modern C++ features where they compile away to zero overhead (e.g., templates, `constexpr`, CRTP, concepts). We strictly compile with `-fno-exceptions` and `-fno-rtti`. 
+3. **Cache Locality:** Keep data structures densely packed and aligned to 64-byte cache lines. Pay careful attention to false sharing when modifying concurrent data structures, particularly around the lock-free queues.
+4. **Prove the Performance:** All pull requests affecting the critical path must include before-and-after latency metrics. Run `./build/benchmark_latency` and include the output in your PR to demonstrate that your changes do not introduce CPU-cycle regressions.
+
+### Pull Request Process
+
+1. Fork the repository and create your feature branch (`git checkout -b feature/optimized-pricing`).
+2. Ensure all correctness tests pass (`cd build && ctest --output-on-failure`).
+3. Run the benchmarking suite to verify latency bounds.
+4. Commit your changes with clear, descriptive commit messages.
+5. Push to the branch and open a Pull Request against the `main` branch.
 
 ---
 
