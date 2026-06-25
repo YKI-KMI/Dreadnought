@@ -1,4 +1,5 @@
 #include "dreadnought/timing/rdtsc.hpp"
+#include <algorithm>
 #include <time.h>
 #include <thread>
 #include <chrono>

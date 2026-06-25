@@ -5,6 +5,7 @@
 #include <iostream>
 #include <csignal>
 #include <atomic>
+#include <memory>
 
 using namespace dreadnought;
 
@@ -29,10 +30,12 @@ int main(int argc, char** argv) {
     std::cout << "Initializing...\n";
     
     // Instantiate strategy: MeanReversion with StaticRiskModel
+    // Heap-allocated: Dreadnought is ~10MB (latency samples + log/NIC rings)
+    // and exceeds the default 8MB Linux/WSL thread stack if placed on stack.
     using StrategyType = MeanReversionStrategy<StaticRiskModel>;
-    Dreadnought<StrategyType> engine;
+    auto engine = std::make_unique<Dreadnought<StrategyType>>();
     
-    if (!engine.init("/tmp/dreadnought.log")) {
+    if (!engine->init("/tmp/dreadnought.log")) {
         std::cerr << "Failed to initialize engine\n";
         return 1;
     }
@@ -43,7 +46,7 @@ int main(int argc, char** argv) {
     
     // Run in separate thread to allow clean shutdown
     std::thread engine_thread([&engine]() {
-        engine.run();
+        engine->run();
     });
     
     // Wait for shutdown signal
@@ -52,11 +55,11 @@ int main(int argc, char** argv) {
     }
     
     std::cout << "\nShutdown requested...\n";
-    engine.shutdown();
+    engine->shutdown();
     engine_thread.join();
     
     // Print latency statistics
-    const auto& tracker = engine.get_latency_tracker();
+    const auto& tracker = engine->get_latency_tracker();
     std::cout << "\n=== Latency Statistics ===\n";
     std::cout << "Mean:  " << tracker.mean() << " ns\n";
     std::cout << "P50:   " << tracker.p50() << " ns\n";
