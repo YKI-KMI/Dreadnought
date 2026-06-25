@@ -10,9 +10,10 @@ struct StaticRiskModel {
     static constexpr int32_t MAX_POSITION = 1000;
     static constexpr int32_t MAX_ORDER_SIZE = 500;
     
-    FORCE_INLINE bool check_position_limit(int32_t current_pos, Quantity order_qty) const noexcept {
-        int32_t new_pos = __builtin_abs(current_pos) + static_cast<int32_t>(order_qty);
-        return new_pos <= MAX_POSITION;
+    FORCE_INLINE bool check_position_limit(int32_t current_pos, Quantity order_qty, Side side) const noexcept {
+        int32_t order_qty_signed = (side == Side::BID) ? static_cast<int32_t>(order_qty) : -static_cast<int32_t>(order_qty);
+        int32_t new_pos = current_pos + order_qty_signed;
+        return __builtin_abs(new_pos) <= MAX_POSITION;
     }
     
     FORCE_INLINE bool check_order_size(Quantity qty) const noexcept {
@@ -35,9 +36,10 @@ struct DynamicRiskModel {
         state.max_notional = 1000000.0;
     }
     
-    FORCE_INLINE bool check_position_limit(int32_t current_pos, Quantity order_qty) const noexcept {
-        int32_t new_pos = __builtin_abs(current_pos) + static_cast<int32_t>(order_qty);
-        return new_pos <= state.max_position;
+    FORCE_INLINE bool check_position_limit(int32_t current_pos, Quantity order_qty, Side side) const noexcept {
+        int32_t order_qty_signed = (side == Side::BID) ? static_cast<int32_t>(order_qty) : -static_cast<int32_t>(order_qty);
+        int32_t new_pos = current_pos + order_qty_signed;
+        return __builtin_abs(new_pos) <= state.max_position;
     }
     
     FORCE_INLINE bool check_order_size(Quantity qty) const noexcept {

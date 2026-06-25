@@ -7,8 +7,8 @@ using namespace dreadnought;
 void test_basic_updates() {
     OrderBook book;
     
-    book.update_bid(100.0, 500);
-    book.update_ask(101.0, 300);
+    book.update_bid(100 * PRICE_SCALER, 500);
+    book.update_ask(101 * PRICE_SCALER, 300);
     
     assert(book.best_bid() == 100 * PRICE_SCALER);
     assert(book.best_ask() == 101 * PRICE_SCALER);
@@ -36,15 +36,15 @@ void test_level_insertion() {
 void test_level_removal() {
     OrderBook book;
     
-    book.update_bid(100.0, 100);
-    book.update_bid(99.0, 200);
+    book.update_bid(100 * PRICE_SCALER, 100);
+    book.update_bid(99 * PRICE_SCALER, 200);
     
-    book.update_bid(100.0, 0); // Remove top level
+    book.update_bid(100 * PRICE_SCALER, 0); // Remove top level
     
-    assert(book.best_bid() == 99.0);
+    assert(book.best_bid() == 99 * PRICE_SCALER);
     assert(book.best_bid_qty() == 200);
     
-    std::cout << "Level removal passed\n";
+    std::cout << "✓ Level removal passed\n";
 }
 
 int main() {

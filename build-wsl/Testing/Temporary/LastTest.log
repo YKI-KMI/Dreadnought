@@ -1,0 +1,43 @@
+Start testing: Jun 25 14:55 UTC
+----------------------------------------------------------
+1/2 Testing: test_order_book
+1/2 Test: test_order_book
+Command: "/mnt/c/Users/yashv/Downloads/Project List/Personal/Dreadnought/build-wsl/test_order_book"
+Directory: /mnt/c/Users/yashv/Downloads/Project List/Personal/Dreadnought/build-wsl
+"test_order_book" start time: Jun 25 14:55 UTC
+Output:
+----------------------------------------------------------
+=== Order Book Tests ===
+✓ Basic updates passed
+✓ Level insertion passed
+✓ Level removal passed
+All tests passed!
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"test_order_book" end time: Jun 25 14:55 UTC
+"test_order_book" time elapsed: 00:00:00
+----------------------------------------------------------
+
+2/2 Testing: test_spsc_queue
+2/2 Test: test_spsc_queue
+Command: "/mnt/c/Users/yashv/Downloads/Project List/Personal/Dreadnought/build-wsl/test_spsc_queue"
+Directory: /mnt/c/Users/yashv/Downloads/Project List/Personal/Dreadnought/build-wsl
+"test_spsc_queue" start time: Jun 25 14:55 UTC
+Output:
+----------------------------------------------------------
+=== SPSC Queue Tests ===
+Single-threaded test passed
+Wraparound test passed
+Producer-consumer test passed
+All tests passed!
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"test_spsc_queue" end time: Jun 25 14:55 UTC
+"test_spsc_queue" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Jun 25 14:55 UTC

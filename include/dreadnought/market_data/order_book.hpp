@@ -129,13 +129,16 @@ private:
     FORCE_INLINE void insert_bid_level(Price price, Quantity qty) noexcept {
         if (unlikely(bid_count >= MAX_PRICE_LEVELS)) return;
         
-        // Find insertion point (first level with price < new price)
-        int insert_idx = 0;
-        while (insert_idx < bid_count && bids[insert_idx].price > price) {
-            ++insert_idx;
+        // Find insertion point - bids are descending
+        int lo = 0, hi = static_cast<int>(bid_count);
+        while (lo < hi) {
+            int mid = (lo + hi) >> 1;
+            if (bids[mid].price > price) lo = mid + 1;
+            else hi = mid;
         }
+        int insert_idx = lo;
         
-        // Shift down using memmove for speed
+        // Shift down using memmove
         if (insert_idx < bid_count) {
             std::memmove(&bids[insert_idx + 1], &bids[insert_idx], 
                          (bid_count - insert_idx) * sizeof(PriceLevel));
@@ -149,10 +152,14 @@ private:
     FORCE_INLINE void insert_ask_level(Price price, Quantity qty) noexcept {
         if (unlikely(ask_count >= MAX_PRICE_LEVELS)) return;
         
-        int insert_idx = 0;
-        while (insert_idx < ask_count && asks[insert_idx].price < price) {
-            ++insert_idx;
+        // Find insertion point - asks are ascending
+        int lo = 0, hi = static_cast<int>(ask_count);
+        while (lo < hi) {
+            int mid = (lo + hi) >> 1;
+            if (asks[mid].price < price) lo = mid + 1;
+            else hi = mid;
         }
+        int insert_idx = lo;
         
         if (insert_idx < ask_count) {
             std::memmove(&asks[insert_idx + 1], &asks[insert_idx], 
@@ -165,21 +172,21 @@ private:
     }
     
     FORCE_INLINE void remove_bid_level(int idx) noexcept {
-        if (idx < bid_count - 1) {
-            std::memmove(&bids[idx], &bids[idx + 1], 
-                         (bid_count - 1 - idx) * sizeof(PriceLevel));
-        }
-        bids[bid_count - 1].clear();
         --bid_count;
+        if (idx < bid_count) {
+            std::memmove(&bids[idx], &bids[idx + 1], 
+                         (bid_count - idx) * sizeof(PriceLevel));
+        }
+        bids[bid_count].clear();
     }
     
     FORCE_INLINE void remove_ask_level(int idx) noexcept {
-        if (idx < ask_count - 1) {
-            std::memmove(&asks[idx], &asks[idx + 1], 
-                         (ask_count - 1 - idx) * sizeof(PriceLevel));
-        }
-        asks[ask_count - 1].clear();
         --ask_count;
+        if (idx < ask_count) {
+            std::memmove(&asks[idx], &asks[idx + 1], 
+                         (ask_count - idx) * sizeof(PriceLevel));
+        }
+        asks[ask_count].clear();
     }
 };
 

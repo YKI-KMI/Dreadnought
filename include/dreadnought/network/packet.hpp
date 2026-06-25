@@ -1,7 +1,7 @@
 #pragma once
 
-#include "dreadnought/core/types.hpp"
 #include "dreadnought/core/compiler.hpp"
+#include "dreadnought/core/types.hpp"
 #include <cstdint>
 
 namespace dreadnought {
@@ -35,7 +35,7 @@ struct alignas(16) MarketDataPayload {
     uint32_t _pad2;
     uint64_t _pad3; // 20 + 8 = 28. Still 4 left.
     uint32_t _pad4; // 28 + 4 = 32.
-};
+}__attribute__((packed));
 
 static_assert(sizeof(MarketDataPayload) == 32, "MarketDataPayload must be 32 bytes");
 
@@ -46,7 +46,7 @@ struct Packet {
         MarketDataPayload market_data;
         uint8_t raw[48];
     } payload;
-    
+
     FORCE_INLINE bool is_market_data() const noexcept {
         return header.type == PacketType::MARKET_DATA_UPDATE;
     }
@@ -68,4 +68,4 @@ struct OrderPacket {
 
 static_assert(sizeof(OrderPacket) == 64, "OrderPacket must be 64 bytes");
 
-} 
+}

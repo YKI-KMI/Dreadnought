@@ -32,9 +32,18 @@ set(COMMON_FLAGS
 
 set(OPTIMIZATION_FLAGS
     -O3                    # Max optimization
-    -flto=thin             # Thin LTO for faster linking
-    -fwhole-program-vtables # LTO-based devirtualization
 )
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    list(APPEND OPTIMIZATION_FLAGS
+        -flto=thin             # Thin LTO for faster linking
+        -fwhole-program-vtables # LTO-based devirtualization
+    )
+else()
+    list(APPEND OPTIMIZATION_FLAGS
+        -flto                  # Standard LTO for GCC
+    )
+endif()
 
 # PGO Support
 option(PGO_GENERATE "Generate PGO profile" OFF)
@@ -75,20 +84,23 @@ add_library(dreadnought_core INTERFACE)
 target_include_directories(dreadnought_core INTERFACE include)
 target_link_libraries(dreadnought_core INTERFACE Threads::Threads)
 
-# ============================================================================
-# EXECUTABLES
-# ============================================================================
-
-add_executable(dreadnought_main
-    src/main.cpp
+add_library(dreadnought_lib STATIC
     src/network/nic_poller.cpp
     src/logger/binary_logger.cpp
     src/threading/affinity.cpp
     src/timing/rdtsc.cpp
     strategy/mean_reversion.cpp
 )
+target_link_libraries(dreadnought_lib PUBLIC dreadnought_core)
 
-target_link_libraries(dreadnought_main PRIVATE dreadnought_core)
+# ============================================================================
+# EXECUTABLES
+# ============================================================================
+
+add_executable(dreadnought_main
+    src/main.cpp
+)
+target_link_libraries(dreadnought_main PRIVATE dreadnought_lib)
 
 # ============================================================================
 # TESTS
@@ -97,15 +109,15 @@ target_link_libraries(dreadnought_main PRIVATE dreadnought_core)
 enable_testing()
 
 add_executable(test_order_book tests/test_order_book.cpp)
-target_link_libraries(test_order_book PRIVATE dreadnought_core)
+target_link_libraries(test_order_book PRIVATE dreadnought_lib)
 add_test(NAME test_order_book COMMAND test_order_book)
 
 add_executable(test_spsc_queue tests/test_spsc_queue.cpp)
-target_link_libraries(test_spsc_queue PRIVATE dreadnought_core)
+target_link_libraries(test_spsc_queue PRIVATE dreadnought_lib)
 add_test(NAME test_spsc_queue COMMAND test_spsc_queue)
 
 add_executable(benchmark_latency tests/benchmark_latency.cpp)
-target_link_libraries(benchmark_latency PRIVATE dreadnought_core)
+target_link_libraries(benchmark_latency PRIVATE dreadnought_lib)
 
 # ============================================================================
 # TOOLS
