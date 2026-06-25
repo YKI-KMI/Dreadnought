@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/benchmark_latency.dir/tests/benchmark_latency.cpp.o -o benchmark_latency  libdreadnought_lib.a 

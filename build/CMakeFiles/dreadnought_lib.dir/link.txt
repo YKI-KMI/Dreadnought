@@ -1,2 +1,0 @@
-/usr/bin/ar qc libdreadnought_lib.a CMakeFiles/dreadnought_lib.dir/src/network/nic_poller.cpp.o CMakeFiles/dreadnought_lib.dir/src/logger/binary_logger.cpp.o CMakeFiles/dreadnought_lib.dir/src/threading/affinity.cpp.o CMakeFiles/dreadnought_lib.dir/src/timing/rdtsc.cpp.o CMakeFiles/dreadnought_lib.dir/strategy/mean_reversion.cpp.o
-/usr/bin/ranlib libdreadnought_lib.a

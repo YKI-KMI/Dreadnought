@@ -1,0 +1,31 @@
+# Build outputs
+build/
+build-*/
+out/
+cmake-build-*/
+
+# Compiled objects and binaries
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Profiling / coverage
+*.profdata
+*.gcda
+*.gcno
+
+# OS
+.DS_Store
+Thumbs.db
